@@ -544,8 +544,8 @@
      ↓ 아래 두 값만 본인 프로젝트 값으로 바꾸면 "공유 모드"로 동작.
        (안 바꾸면 예전처럼 localStorage 로컬 모드로 그냥 동작)
   ============================================================ */
-  const SUPABASE_URL      = "https://YOUR-PROJECT.supabase.co";   // ← Project URL
-  const SUPABASE_ANON_KEY = "YOUR-ANON-KEY";                      // ← anon public key
+  const SUPABASE_URL      = "https://eexjrubzgtekeuptiszn.supabase.co";   // ← Project URL
+  const SUPABASE_ANON_KEY = "sb_publishable_06r45gjX1Bv2ikAN-ScyBQ_mn1dZ0OJ"; // ← publishable key
   const CLOUD = !SUPABASE_URL.includes("YOUR-PROJECT");
   const sb = CLOUD ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
