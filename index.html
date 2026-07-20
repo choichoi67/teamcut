@@ -527,14 +527,14 @@
     { name:"제욱", w:81.5  },
     { name:"성민", w:79.8  },
     { name:"혜인", w:60.7  },
-    { name:"승태", w:100.85 },
+    { name:"승태", w:100.85, rate:0.07 },
   ];
   const RATE = 0.10;                 // 감량 비율
   const MONTHS = 3;
 
   const f1 = n => n.toFixed(1);
   const people = [...TEAM].sort((a,b)=>b.w-a.w).map(p=>{
-    const cut = Math.floor(p.w*RATE);   // 감량 목표는 소수점 버리고 정수 kg
+    const cut = Math.floor(p.w*(p.rate ?? RATE));   // 개인별 감량률(기본 10%, 승태 7%)
     return { ...p, target:p.w-cut, cut, perMonth:cut/MONTHS };
   });
   const maxW = Math.max(...people.map(p=>p.w));
