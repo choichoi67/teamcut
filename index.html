@@ -265,6 +265,49 @@
     .eyebrow::before{animation:none;}
   }
 
+  /* ---------- CUT FUTURES ---------- */
+  .fx{margin-top:44px;}
+  .fx-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:12px;margin-bottom:16px;}
+  .fx-head h2{font-family:"Space Grotesk",sans-serif;font-size:clamp(22px,4vw,32px);font-weight:700;letter-spacing:-.02em;}
+  .fx-head span{font-size:13px;color:var(--muted);}
+  .fx-card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:0 20px 50px -38px rgba(0,0,0,.8);}
+  .fx-grid{display:grid;grid-template-columns:1fr 1.15fr;gap:18px;}
+  .fx-k{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin-bottom:8px;position:relative;}
+  .fx-main .fx-bigdate{font-family:"Space Grotesk",sans-serif;font-size:clamp(32px,6vw,46px);font-weight:700;line-height:1;color:var(--mint);margin-bottom:6px;}
+  .fx-vs{font-size:13px;color:var(--muted);margin-bottom:16px;}
+  .fx-vs b{color:var(--ink);} .fx-vs .up{color:var(--cut);}
+  .fx-prob{display:flex;align-items:center;gap:10px;margin-bottom:14px;font-size:13px;color:var(--muted);}
+  .prob-bar{flex:1;height:10px;border-radius:6px;background:rgba(255,255,255,.06);overflow:hidden;}
+  .prob-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--cut),var(--mint));transition:width .8s cubic-bezier(.16,1,.3,1);}
+  .fx-prob b{color:var(--ink);font-size:15px;}
+  .fx-paces{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+  .fx-paces div{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;}
+  .fx-paces span{display:block;font-size:11px;color:var(--faint);margin-bottom:4px;}
+  .fx-paces b{font-size:17px;} .fx-paces .dn{color:var(--mint);}
+  .fx-status{font-weight:700;font-size:16px;}
+  .fx-official{position:absolute;font-size:10px;color:var(--faint);white-space:nowrap;transform:translateX(-50%);}
+  .race-row{display:grid;grid-template-columns:96px 1fr 64px;align-items:center;gap:12px;margin-top:14px;}
+  .race-lab{font-size:13px;line-height:1.2;} .race-lab b{font-weight:700;} .race-lab span{display:block;font-size:10px;color:var(--faint);}
+  .race-track{position:relative;height:12px;border-radius:7px;background:rgba(255,255,255,.05);}
+  .race-fill{position:absolute;left:0;top:0;height:100%;border-radius:7px;background:linear-gradient(90deg,var(--keep),var(--mint));transition:width .9s cubic-bezier(.16,1,.3,1);}
+  .race-dot{position:absolute;top:-7px;transform:translateX(-50%);font-size:14px;transition:left .9s cubic-bezier(.16,1,.3,1);}
+  .race-date{font-family:"Space Grotesk",sans-serif;font-size:12px;font-weight:600;text-align:right;color:var(--muted);}
+  .fx-alert{margin-top:18px;border-left:3px solid var(--cut);background:linear-gradient(90deg,rgba(255,106,77,.08),var(--surface) 60%);}
+  .fx-alert-h{font-weight:700;color:var(--cut-2);margin-bottom:8px;}
+  .fx-alert-b{font-size:14px;line-height:1.6;margin-bottom:6px;} .fx-alert-b b{color:var(--ink);}
+  .fx-alert-d{font-size:13px;color:var(--muted);margin-bottom:8px;} .fx-alert-d b{color:var(--cut-2);}
+  .rev-svg{width:100%;max-width:340px;height:auto;overflow:visible;}
+  .fx-news{margin-top:18px;}
+  .fx-news p{font-size:14px;line-height:1.7;color:var(--muted);margin-top:6px;} .fx-news p b{color:var(--ink);} .fx-news .dn{color:var(--mint);}
+  .fx-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;margin-top:18px;}
+  .pcard{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;}
+  .pc-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;}
+  .pc-top b{font-size:16px;font-weight:700;} .pc-top span{font-size:11px;color:var(--faint);}
+  .pc-row{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;color:var(--muted);padding:4px 0;}
+  .pc-row b{color:var(--ink);font-size:15px;}
+  .pc-wow{margin-top:10px;font-size:12px;font-weight:700;} .pc-wow.dn{color:var(--mint);} .pc-wow.up{color:var(--cut);}
+  @media (max-width:680px){ .fx-grid{grid-template-columns:1fr;} }
+
   /* ---------- CALENDAR ---------- */
   .cal-wrap{margin-top:48px;}
   .cal-head{
@@ -468,6 +511,9 @@
     </div>
     <div class="note">게이지 길이 = 현재 체중(최대 인원 기준) · 감량 = 10% 내림(정수 kg) · 월 페이스 = 감량량 ÷ 3</div>
   </div>
+
+  <!-- ---------- CUT FUTURES ---------- -->
+  <div class="fx" id="futures"><!-- injected by JS --></div>
 
   <!-- ---------- CALENDAR ---------- -->
   <div class="cal-wrap">
@@ -848,6 +894,7 @@
     renderChart();
     renderBmi();
     renderBoard();
+    renderFutures();
   }
 
   /* ---- BMI 계산 (한국 성인 기준) ---- */
@@ -1120,6 +1167,181 @@
     localStorage.setItem(LS_WHO, whoSel.value);
     renderCalendar();
   });
+
+  /* ============================================================
+     🔮 CUT FUTURES — 예측 시장
+     최근 3/7/14일·전체 페이스(최소제곱 추세)로 목표 달성일·가능성·
+     순위 역전·시장 뉴스를 산출. 캘린더 기록만 사용, 새 의존성 없음.
+     ponytail: 확률·변동성은 단순 휴리스틱(선형추세 + 잔차 표준편차).
+  ============================================================ */
+  const clampN = (v,a,b)=>Math.max(a,Math.min(b,v));
+  function slopePerWeek(pts){                 // pts:[{x:일,y:kg}] → kg/주(음수=감량)
+    const n=pts.length; if(n<2) return null;
+    const sx=pts.reduce((s,p)=>s+p.x,0), sy=pts.reduce((s,p)=>s+p.y,0);
+    const sxx=pts.reduce((s,p)=>s+p.x*p.x,0), sxy=pts.reduce((s,p)=>s+p.x*p.y,0);
+    const d=n*sxx-sx*sx; if(!d) return null;
+    return ((n*sxy-sx*sy)/d)*7;
+  }
+  const idxToDate = idx => new Date(YEAR,6,1+Math.round(idx));   // 7/1 기준 경과일 → Date
+  const mdLabel   = idx => { const d=idxToDate(idx); return `${d.getMonth()+1}월 ${d.getDate()}일`; };
+  const TODAY_IDX = clampN(dayIndexOf(TODAY),0,SPAN);
+  const DAYS_LEFT = Math.max(SPAN-TODAY_IDX,1);
+  const fmtPace   = w => w==null ? "–" : `${w<=0?"":"+"}${w.toFixed(1)}kg/주`;
+
+  function analyze(name){
+    const info=getInfo(name), logs=collectLogs(name);
+    const cur    = logs.length ? logs[logs.length-1].w   : info.w;
+    const curIdx = logs.length ? logs[logs.length-1].idx : TODAY_IDX;
+    const remaining = Math.max(0, cur-info.target);
+    const win = days => slopePerWeek(logs.filter(l=>l.idx>=curIdx-days).map(l=>({x:l.idx,y:l.w})));
+    const p3=win(3), p7=win(7), p14=win(14);
+    const prevWk = slopePerWeek(logs.filter(l=>l.idx>=curIdx-14 && l.idx<curIdx-7).map(l=>({x:l.idx,y:l.w})));
+    let vol=0;                                  // 최근 변동성(kg 스윙, 0~1 정규화)
+    if(logs.length>=3){ const L=logs.slice(-5), D=[]; for(let i=1;i<L.length;i++) D.push(L[i].w-L[i-1].w);
+      const m=D.reduce((s,d)=>s+d,0)/D.length; vol=Math.min(Math.sqrt(D.reduce((s,d)=>s+(d-m)**2,0)/D.length)/2,1); }
+    const eta = perWk => remaining<=0 ? {done:true}
+                       : (perWk!=null && perWk<-0.01 ? {idx:curIdx + remaining/(-perWk/7)} : null);
+    const needWk = remaining>0 ? remaining/(DAYS_LEFT/7) : 0;
+    const haveWk = p14!=null ? -p14 : (p7!=null?-p7:0);
+    const prob = remaining<=0 ? 100 : (haveWk<=0 ? 8 : clampN(Math.round(35+55*(haveWk/needWk)-vol*12),5,97));
+    const lostPct = (info.w-cur)/info.w*100;
+    return {name,info,logs,cur,curIdx,remaining,lostPct,p3,p7,p14,prevWk,vol,eta,prob,needWk,haveWk};
+  }
+
+  function renderFutures(){
+    const el = document.getElementById("futures"); if(!el) return;
+    const A = people.map(x=>analyze(x.name));
+    const anyData = A.some(a=>a.logs.length>0);
+
+    // ---- 팀 시나리오 ----
+    const sumPace = k => { let s=0,any=false; A.forEach(a=>{ if(a[k]!=null){s+=a[k];any=true;} }); return any?s:null; };
+    const tRemain = A.reduce((s,a)=>s+a.remaining,0);
+    const teamEta = w => tRemain<=0?{done:true}:(w!=null&&w<-0.01?{idx:TODAY_IDX + tRemain/(-w/7)}:null);
+    const tp7=sumPace('p7'), tp14=sumPace('p14'), tp3=sumPace('p3');
+    const tNeedWk = tRemain>0 ? tRemain/(DAYS_LEFT/7) : 0;
+    const tHave = tp14!=null?-tp14:0;
+    const tProb = tRemain<=0?100:(tHave<=0?8:clampN(Math.round(35+55*(tHave/tNeedWk)),5,97));
+    const ratio = tNeedWk>0 ? tHave/tNeedWk : 2;
+    const status = tRemain<=0?"🏁 목표 달성":ratio>=1?"🟢 순항 중":ratio>=0.6?"🟡 분발 필요":"🔴 위기";
+    const base = teamEta(tp14);
+    const baseTxt = tRemain<=0?"목표 달성 완료":(base?mdLabel(base.idx):"예측 불가");
+    const vsEnd = base ? (base.idx<=SPAN?`공식 종료일보다 <b>${Math.round(SPAN-base.idx)}일 빠름</b>`
+                                        :`공식 종료일보다 <b class="up">${Math.round(base.idx-SPAN)}일 지연</b>`)
+                       : "감량 데이터가 더 필요해요";
+
+    // ---- 3 시나리오 레이스 ----
+    const scen = [
+      {emoji:"🏃",lab:"낙관",sub:"최근 7일 페이스",eta:teamEta(tp7)},
+      {emoji:"🚶",lab:"기본",sub:"최근 14일 평균",eta:teamEta(tp14)},
+      {emoji:"🐌",lab:"위기",sub:"최근 3일 페이스",eta:teamEta(tp3)},
+    ];
+    const horizon = Math.max(SPAN, ...scen.map(s=>s.eta?s.eta.idx:0)) + 4;
+    const raceRows = scen.map(s=>{
+      const pct = s.eta ? clampN((s.eta.idx-TODAY_IDX)/(horizon-TODAY_IDX)*100,4,100) : 100;
+      const date = s.eta ? (s.eta.done?"완료":mdLabel(s.eta.idx)) : "예측불가";
+      return `<div class="race-row">
+        <div class="race-lab">${s.emoji} <b>${s.lab}</b><span>${s.sub}</span></div>
+        <div class="race-track"><div class="race-fill" style="width:${pct}%"></div><span class="race-dot" style="left:${pct}%">${s.emoji}</span></div>
+        <div class="race-date">${date}</div></div>`;
+    }).join("");
+    // 공식 종료일 표식
+    const endPct = clampN((SPAN-TODAY_IDX)/(horizon-TODAY_IDX)*100,0,100);
+
+    const mainCard = `
+      <div class="fx-card fx-main">
+        <div class="fx-k">목표 달성 예상일</div>
+        <div class="fx-bigdate num">${baseTxt}</div>
+        <div class="fx-vs">${vsEnd}</div>
+        <div class="fx-prob">
+          <span>달성 가능성</span>
+          <div class="prob-bar"><div class="prob-fill" style="width:${tProb}%"></div></div>
+          <b class="num">${tProb}%</b>
+        </div>
+        <div class="fx-paces">
+          <div><span>최근 7일 페이스</span><b class="num ${tp7<0?'dn':''}">${fmtPace(tp7)}</b></div>
+          <div><span>필요한 페이스</span><b class="num">${tRemain>0?fmtPace(-tNeedWk):"–"}</b></div>
+        </div>
+        <div class="fx-status">${status}</div>
+      </div>`;
+
+    const raceCard = `
+      <div class="fx-card fx-race">
+        <div class="fx-k">시나리오 레이스 <span class="fx-official" style="left:calc(${endPct}% )">┊ 9/30</span></div>
+        ${raceRows}
+      </div>`;
+
+    // ---- 순위 역전 예측 ----
+    const ranked=[...A].sort((a,b)=>b.lostPct-a.lostPct);
+    const proj = a => ({ a0:a.lostPct, b:(-(a.p14!=null?a.p14:0)/7/a.info.w)*100 });  // lostPct/일
+    let best=null;
+    for(let i=0;i<ranked.length;i++) for(let j=i+1;j<ranked.length;j++){
+      const H=ranked[i], L=ranked[j], PH=proj(H), PL=proj(L), db=PL.b-PH.b;
+      if(db<=1e-6) continue;
+      const t=(PH.a0-PL.a0)/db;
+      if(t>0.3 && t<=DAYS_LEFT && (!best||t<best.t)) best={t,H,L,idx:TODAY_IDX+t,PH,PL};
+    }
+    let alertCard="";
+    if(best){
+      // 미니 교차 그래프
+      const W=320,Ht=96,pad=10, T=Math.min(best.t*1.35, DAYS_LEFT);
+      const yH0=best.PH.a0, yH1=best.PH.a0+best.PH.b*T, yL0=best.PL.a0, yL1=best.PL.a0+best.PL.b*T;
+      const ymin=Math.min(yH0,yH1,yL0,yL1), ymax=Math.max(yH0,yH1,yL0,yL1)||1, yr=(ymax-ymin)||1;
+      const X=t=>pad+(t/T)*(W-2*pad), Y=v=>pad+(1-(v-ymin)/yr)*(Ht-2*pad);
+      const cy=best.PH.a0+best.PH.b*best.t;
+      const svg=`<svg viewBox="0 0 ${W} ${Ht}" class="rev-svg">
+        <polyline points="${X(0)},${Y(yH0)} ${X(T)},${Y(yH1)}" fill="none" stroke="var(--muted)" stroke-width="2"/>
+        <polyline points="${X(0)},${Y(yL0)} ${X(T)},${Y(yL1)}" fill="none" stroke="var(--mint)" stroke-width="2.4"/>
+        <text x="${X(0)}" y="${Y(yH0)-5}" fill="var(--muted)" font-size="10">${best.H.name}</text>
+        <text x="${X(0)}" y="${Y(yL0)+13}" fill="var(--mint)" font-size="10">${best.L.name}</text>
+        <text x="${X(best.t)}" y="${Y(cy)-7}" fill="var(--cut)" font-size="12" text-anchor="middle">★</text>
+      </svg>`;
+      alertCard=`
+        <div class="fx-card fx-alert">
+          <div class="fx-alert-h">⚠️ 순위 변동 예상</div>
+          <div class="fx-alert-b">현재 속도 유지 시, <b>${best.L.name}</b>이(가) <b>${Math.round(best.t)}일 뒤</b> <b>${best.H.name}</b>을(를) 추월할 가능성.</div>
+          <div class="fx-alert-d">예상 교차일 <b class="num">${mdLabel(best.idx)}</b></div>
+          ${svg}
+        </div>`;
+    }
+
+    // ---- 오늘의 시장 뉴스 ----
+    let drop=null, flat=null;
+    A.forEach(a=>{ const L=a.logs;
+      if(L.length>=2){ const d=L[L.length-2].w-L[L.length-1].w, gap=L[L.length-1].idx-L[L.length-2].idx;
+        if(d>0.25 && gap<=3 && (!drop||d>drop.d)) drop={name:a.name,d,gap}; }
+      if(L.length>=2){ const r=L.slice(-3), sp=Math.max(...r.map(x=>x.w))-Math.min(...r.map(x=>x.w)), span=r[r.length-1].idx-r[0].idx;
+        if(sp<=0.3 && span>=2 && (!flat||span>flat.span)) flat={name:a.name,span}; }
+    });
+    const news=[];
+    if(drop) news.push(`<b>${drop.name}</b>, ${drop.gap<=1?"하루":drop.gap+"일"} 만에 <b class="dn">-${drop.d.toFixed(1)}kg</b> 하락. CUT·KOSPI 시장에 충격.`);
+    if(flat) news.push(`<b>${flat.name}</b>은(는) ${flat.span}일째 횡보하며 관망세를 이어가는 중.`);
+    if(!news.length) news.push(anyData?"큰 변동 없이 잔잔한 장세.":"아직 거래가 조용합니다. 첫 기록을 기다리는 중.");
+    const newsCard=`<div class="fx-card fx-news"><div class="fx-k">📰 오늘의 시장 뉴스</div>${news.map(n=>`<p>${n}</p>`).join("")}</div>`;
+
+    // ---- 개인별 예측 카드 ----
+    const cards = ranked.map((a,i)=>{
+      const e=a.eta(a.p14);
+      const etaTxt=a.remaining<=0?"🎉 달성":(e?mdLabel(e.idx):"–");
+      let wow="";
+      if(a.p7!=null && a.prevWk!=null && a.prevWk<0){
+        const now=-a.p7, prev=-a.prevWk, ch=(now-prev)/prev*100;
+        wow=`<div class="pc-wow ${ch>=0?'dn':'up'}">${ch>=0?"📈":"📉"} 지난주보다 ${Math.abs(Math.round(ch))}% ${ch>=0?"상승":"둔화"}</div>`;
+      }
+      return `<div class="pcard">
+        <div class="pc-top"><b>${a.name}</b><span>현재 ${i+1}위</span></div>
+        <div class="pc-row"><span>목표까지</span><b class="num">${a.remaining<=0?"0":f1(a.remaining)}kg</b></div>
+        <div class="pc-row"><span>예상 완료일</span><b class="num">${etaTxt}</b></div>
+        <div class="pc-row"><span>달성 가능성</span><b class="num">${a.prob}%</b></div>
+        ${wow}
+      </div>`;
+    }).join("");
+
+    el.innerHTML =
+      `<div class="fx-head"><h2>🔮 CUT FUTURES</h2><span>예측 시장 · 최근 페이스 기반 추정</span></div>
+       <div class="fx-grid">${mainCard}${raceCard}</div>
+       ${alertCard}${newsCard}
+       <div class="fx-cards">${cards}</div>`;
+  }
 
   // 초기화: 공용 데이터 먼저 불러오고 → 렌더 → 실시간 구독
   (async function init(){
