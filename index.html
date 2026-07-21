@@ -292,6 +292,9 @@
   .race-fill{position:absolute;left:0;top:0;height:100%;border-radius:7px;background:linear-gradient(90deg,var(--keep),var(--mint));transition:width .9s cubic-bezier(.16,1,.3,1);}
   .race-dot{position:absolute;top:-7px;transform:translateX(-50%);font-size:14px;transition:left .9s cubic-bezier(.16,1,.3,1);}
   .race-date{font-family:"Space Grotesk",sans-serif;font-size:12px;font-weight:600;text-align:right;color:var(--muted);}
+  .fx-revhead{margin-top:20px;margin-bottom:2px;font-weight:700;color:var(--cut-2);font-size:15px;}
+  .fx-revs{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:14px;margin-top:12px;}
+  .fx-revs .fx-alert{margin-top:0;}
   .fx-alert{margin-top:18px;border-left:3px solid var(--cut);background:linear-gradient(90deg,rgba(255,106,77,.08),var(--surface) 60%);}
   .fx-alert-h{font-weight:700;color:var(--cut-2);margin-bottom:8px;}
   .fx-alert-b{font-size:14px;line-height:1.6;margin-bottom:6px;} .fx-alert-b b{color:var(--ink);}
@@ -1270,38 +1273,42 @@
         ${raceRows}
       </div>`;
 
-    // ---- 순위 역전 예측 ----
+    // ---- 순위 역전 예측 (임박 순 여러 건) ----
     const ranked=[...A].sort((a,b)=>b.lostPct-a.lostPct);
     const proj = a => ({ a0:a.lostPct, b:(-(a.p14!=null?a.p14:0)/7/a.info.w)*100 });  // lostPct/일
-    let best=null;
+    const crossings=[];
     for(let i=0;i<ranked.length;i++) for(let j=i+1;j<ranked.length;j++){
       const H=ranked[i], L=ranked[j], PH=proj(H), PL=proj(L), db=PL.b-PH.b;
       if(db<=1e-6) continue;
       const t=(PH.a0-PL.a0)/db;
-      if(t>0.3 && t<=DAYS_LEFT && (!best||t<best.t)) best={t,H,L,idx:TODAY_IDX+t,PH,PL};
+      if(t>0.3 && t<=DAYS_LEFT) crossings.push({t,H,L,idx:TODAY_IDX+t,PH,PL,rankH:i+1,rankL:j+1});
     }
-    let alertCard="";
-    if(best){
-      // 미니 교차 그래프
-      const W=320,Ht=96,pad=10, T=Math.min(best.t*1.35, DAYS_LEFT);
-      const yH0=best.PH.a0, yH1=best.PH.a0+best.PH.b*T, yL0=best.PL.a0, yL1=best.PL.a0+best.PL.b*T;
+    crossings.sort((a,b)=>a.t-b.t);
+    const conf = t => t<DAYS_LEFT*0.3?"높음":t<DAYS_LEFT*0.6?"보통":"낮음";
+    const revSvg = c => {
+      const W=300,Ht=88,pad=10, T=Math.min(c.t*1.35, DAYS_LEFT);
+      const yH0=c.PH.a0, yH1=c.PH.a0+c.PH.b*T, yL0=c.PL.a0, yL1=c.PL.a0+c.PL.b*T;
       const ymin=Math.min(yH0,yH1,yL0,yL1), ymax=Math.max(yH0,yH1,yL0,yL1)||1, yr=(ymax-ymin)||1;
       const X=t=>pad+(t/T)*(W-2*pad), Y=v=>pad+(1-(v-ymin)/yr)*(Ht-2*pad);
-      const cy=best.PH.a0+best.PH.b*best.t;
-      const svg=`<svg viewBox="0 0 ${W} ${Ht}" class="rev-svg">
+      const cy=c.PH.a0+c.PH.b*c.t;
+      return `<svg viewBox="0 0 ${W} ${Ht}" class="rev-svg">
         <polyline points="${X(0)},${Y(yH0)} ${X(T)},${Y(yH1)}" fill="none" stroke="var(--muted)" stroke-width="2"/>
         <polyline points="${X(0)},${Y(yL0)} ${X(T)},${Y(yL1)}" fill="none" stroke="var(--mint)" stroke-width="2.4"/>
-        <text x="${X(0)}" y="${Y(yH0)-5}" fill="var(--muted)" font-size="10">${best.H.name}</text>
-        <text x="${X(0)}" y="${Y(yL0)+13}" fill="var(--mint)" font-size="10">${best.L.name}</text>
-        <text x="${X(best.t)}" y="${Y(cy)-7}" fill="var(--cut)" font-size="12" text-anchor="middle">★</text>
+        <text x="${X(0)}" y="${Y(yH0)-5}" fill="var(--muted)" font-size="10">${c.H.name}</text>
+        <text x="${X(0)}" y="${Y(yL0)+13}" fill="var(--mint)" font-size="10">${c.L.name}</text>
+        <text x="${X(c.t)}" y="${Y(cy)-7}" fill="var(--cut)" font-size="12" text-anchor="middle">★</text>
       </svg>`;
-      alertCard=`
+    };
+    let alertCard="";
+    if(crossings.length){
+      const cards = crossings.slice(0,4).map(c=>`
         <div class="fx-card fx-alert">
-          <div class="fx-alert-h">⚠️ 순위 변동 예상</div>
-          <div class="fx-alert-b">현재 속도 유지 시, <b>${best.L.name}</b>이(가) <b>${Math.round(best.t)}일 뒤</b> <b>${best.H.name}</b>을(를) 추월할 가능성.</div>
-          <div class="fx-alert-d">예상 교차일 <b class="num">${mdLabel(best.idx)}</b></div>
-          ${svg}
-        </div>`;
+          <div class="fx-alert-h">⚠️ ${c.L.name} ↗ ${c.H.name}</div>
+          <div class="fx-alert-b"><b>${c.L.name}</b>(${c.rankL}위)가 <b>${Math.round(c.t)}일 뒤</b> <b>${c.H.name}</b>(${c.rankH}위) 추월 가능</div>
+          <div class="fx-alert-d">교차일 <b class="num">${mdLabel(c.idx)}</b> · 가능성 ${conf(c.t)}</div>
+          ${revSvg(c)}
+        </div>`).join("");
+      alertCard=`<div class="fx-revhead">⚠️ 순위 변동 예상 · 임박 ${Math.min(crossings.length,4)}건 (총 ${crossings.length}건)</div><div class="fx-revs">${cards}</div>`;
     }
 
     // ---- 오늘의 시장 뉴스 ----
