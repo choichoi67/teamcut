@@ -293,12 +293,17 @@
   .race-dot{position:absolute;top:-7px;transform:translateX(-50%);font-size:14px;transition:left .9s cubic-bezier(.16,1,.3,1);}
   .race-date{font-family:"Space Grotesk",sans-serif;font-size:12px;font-weight:600;text-align:right;color:var(--muted);}
   .fx-revhead{margin-top:20px;margin-bottom:2px;font-weight:700;color:var(--cut-2);font-size:15px;}
-  .fx-revhead .rev-hint{font-size:11px;font-weight:500;color:var(--faint);margin-left:6px;}
   .fx-alert-h .rev-n{float:right;font-size:11px;font-weight:600;color:var(--faint);}
-  .fx-revs{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;margin-top:12px;padding-bottom:8px;-webkit-overflow-scrolling:touch;scrollbar-width:thin;}
-  .fx-revs::-webkit-scrollbar{height:6px;}
-  .fx-revs::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px;}
-  .fx-revs .fx-alert{margin-top:0;flex:0 0 clamp(240px,80%,290px);scroll-snap-align:start;}
+  .fx-revwrap{position:relative;margin-top:12px;}
+  .rev-nav{position:absolute;top:50%;transform:translateY(-50%);z-index:3;width:38px;height:38px;
+    border-radius:50%;border:1px solid var(--line);background:rgba(10,14,23,.82);color:var(--ink);
+    font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .rev-nav:hover{border-color:var(--mint);color:var(--mint);}
+  .rev-nav.prev{left:-8px;} .rev-nav.next{right:-8px;}
+  .fx-revs{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+  .fx-revs::-webkit-scrollbar{display:none;}
+  .fx-revs .fx-alert{margin-top:0;flex:0 0 100%;box-sizing:border-box;scroll-snap-align:center;}
+  .fx-revs .rev-svg{max-width:100%;}
   .fx-alert{margin-top:18px;border-left:3px solid var(--cut);background:linear-gradient(90deg,rgba(255,106,77,.08),var(--surface) 60%);}
   .fx-alert-h{font-weight:700;color:var(--cut-2);margin-bottom:8px;}
   .fx-alert-b{font-size:14px;line-height:1.6;margin-bottom:6px;} .fx-alert-b b{color:var(--ink);}
@@ -1195,24 +1200,30 @@
   const DAYS_LEFT = Math.max(SPAN-TODAY_IDX,1);
   const fmtPace   = w => w==null ? "–" : `${w<=0?"":"+"}${w.toFixed(1)}kg/주`;
 
+  const pick = (...xs)=>{ for(const v of xs) if(v!=null) return v; return null; };
   function analyze(name){
     const info=getInfo(name), logs=collectLogs(name);
     const cur    = logs.length ? logs[logs.length-1].w   : info.w;
     const curIdx = logs.length ? logs[logs.length-1].idx : TODAY_IDX;
     const remaining = Math.max(0, cur-info.target);
+    // 추세: 마지막 기록 기준 최근 N일 구간의 최소제곱 기울기(kg/주). 데이터 없으면 더 넓은 창으로 폴백.
     const win = days => slopePerWeek(logs.filter(l=>l.idx>=curIdx-days).map(l=>({x:l.idx,y:l.w})));
-    const p3=win(3), p7=win(7), p14=win(14);
+    const p3=win(3), p7=win(7), p14=win(14), pAll=slopePerWeek(logs.map(l=>({x:l.idx,y:l.w})));
+    const paceOpt    = pick(p7, p14, pAll, p3);    // 낙관
+    const paceBasic  = pick(p14, p7, pAll, p3);    // 기본
+    const paceCrisis = pick(p3, p7, p14, pAll);    // 위기
     const prevWk = slopePerWeek(logs.filter(l=>l.idx>=curIdx-14 && l.idx<curIdx-7).map(l=>({x:l.idx,y:l.w})));
-    let vol=0;                                  // 최근 변동성(kg 스윙, 0~1 정규화)
+    let vol=0;                                     // 최근 변동성(kg 스윙, 0~1 정규화)
     if(logs.length>=3){ const L=logs.slice(-5), D=[]; for(let i=1;i<L.length;i++) D.push(L[i].w-L[i-1].w);
       const m=D.reduce((s,d)=>s+d,0)/D.length; vol=Math.min(Math.sqrt(D.reduce((s,d)=>s+(d-m)**2,0)/D.length)/2,1); }
+    // ETA: 항상 "오늘"에서 현재 체중 기준으로 남은 감량 ÷ 페이스. (과거 기록일 기준으로 재던 버그 수정)
     const eta = perWk => remaining<=0 ? {done:true}
-                       : (perWk!=null && perWk<-0.01 ? {idx:curIdx + remaining/(-perWk/7)} : null);
-    const needWk = remaining>0 ? remaining/(DAYS_LEFT/7) : 0;
-    const haveWk = p14!=null ? -p14 : (p7!=null?-p7:0);
+                       : (perWk!=null && perWk<-0.01 ? {idx:TODAY_IDX + remaining/(-perWk/7)} : null);
+    const needWk = remaining>0 ? remaining/(DAYS_LEFT/7) : 0;   // 오늘부터 9/30까지 필요한 주간 감량
+    const haveWk = paceBasic!=null ? -paceBasic : 0;
     const prob = remaining<=0 ? 100 : (haveWk<=0 ? 8 : clampN(Math.round(35+55*(haveWk/needWk)-vol*12),5,97));
     const lostPct = (info.w-cur)/info.w*100;
-    return {name,info,logs,cur,curIdx,remaining,lostPct,p3,p7,p14,prevWk,vol,eta,prob,needWk,haveWk};
+    return {name,info,logs,cur,curIdx,remaining,lostPct,p3,p7,p14,pAll,paceOpt,paceBasic,paceCrisis,prevWk,vol,eta,prob,needWk,haveWk};
   }
 
   function renderFutures(){
@@ -1224,7 +1235,7 @@
     const sumPace = k => { let s=0,any=false; A.forEach(a=>{ if(a[k]!=null){s+=a[k];any=true;} }); return any?s:null; };
     const tRemain = A.reduce((s,a)=>s+a.remaining,0);
     const teamEta = w => tRemain<=0?{done:true}:(w!=null&&w<-0.01?{idx:TODAY_IDX + tRemain/(-w/7)}:null);
-    const tp7=sumPace('p7'), tp14=sumPace('p14'), tp3=sumPace('p3');
+    const tp7=sumPace('paceOpt'), tp14=sumPace('paceBasic'), tp3=sumPace('paceCrisis');
     const tNeedWk = tRemain>0 ? tRemain/(DAYS_LEFT/7) : 0;
     const tHave = tp14!=null?-tp14:0;
     const tProb = tRemain<=0?100:(tHave<=0?8:clampN(Math.round(35+55*(tHave/tNeedWk)),5,97));
@@ -1279,7 +1290,7 @@
 
     // ---- 순위 역전 예측 (임박 순 여러 건) ----
     const ranked=[...A].sort((a,b)=>b.lostPct-a.lostPct);
-    const proj = a => ({ a0:a.lostPct, b:(-(a.p14!=null?a.p14:0)/7/a.info.w)*100 });  // lostPct/일
+    const proj = a => ({ a0:a.lostPct, b:(-(a.paceBasic!=null?a.paceBasic:0)/7/a.info.w)*100 });  // lostPct/일
     const crossings=[];
     for(let i=0;i<ranked.length;i++) for(let j=i+1;j<ranked.length;j++){
       const H=ranked[i], L=ranked[j], PH=proj(H), PL=proj(L), db=PL.b-PH.b;
@@ -1312,7 +1323,12 @@
           <div class="fx-alert-d">교차일 <b class="num">${mdLabel(c.idx)}</b> · 가능성 ${conf(c.t)}</div>
           ${revSvg(c)}
         </div>`).join("");
-      alertCard=`<div class="fx-revhead">⚠️ 순위 변동 예상 · ${crossings.length}건 <span class="rev-hint">← 옆으로 슥슥 →</span></div><div class="fx-revs">${cards}</div>`;
+      alertCard=`<div class="fx-revhead">⚠️ 순위 변동 예상 · ${crossings.length}건</div>
+        <div class="fx-revwrap">
+          <button class="rev-nav prev" data-rev="prev" aria-label="이전">◀</button>
+          <div class="fx-revs">${cards}</div>
+          <button class="rev-nav next" data-rev="next" aria-label="다음">▶</button>
+        </div>`;
     }
 
     // ---- 오늘의 시장 뉴스 ----
@@ -1331,7 +1347,7 @@
 
     // ---- 개인별 예측 카드 ----
     const cards = ranked.map((a,i)=>{
-      const e=a.eta(a.p14);
+      const e=a.eta(a.paceBasic);
       const etaTxt=a.remaining<=0?"🎉 달성":(e?mdLabel(e.idx):"–");
       let wow="";
       if(a.p7!=null && a.prevWk!=null && a.prevWk<0){
@@ -1353,6 +1369,14 @@
        ${alertCard}${newsCard}
        <div class="fx-cards">${cards}</div>`;
   }
+
+  // 순위변동 카드 ◀▶ 네비 (한 번만 바인딩 — #futures 엘리먼트는 유지됨)
+  document.getElementById("futures").addEventListener("click", e=>{
+    const b=e.target.closest("[data-rev]"); if(!b) return;
+    const track=document.querySelector(".fx-revs"); if(!track) return;
+    const w=track.clientWidth || 300;
+    track.scrollBy({ left:(b.dataset.rev==="next"?1:-1)*w, behavior:"smooth" });
+  });
 
   // 초기화: 공용 데이터 먼저 불러오고 → 렌더 → 실시간 구독
   (async function init(){
