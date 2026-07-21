@@ -293,8 +293,12 @@
   .race-dot{position:absolute;top:-7px;transform:translateX(-50%);font-size:14px;transition:left .9s cubic-bezier(.16,1,.3,1);}
   .race-date{font-family:"Space Grotesk",sans-serif;font-size:12px;font-weight:600;text-align:right;color:var(--muted);}
   .fx-revhead{margin-top:20px;margin-bottom:2px;font-weight:700;color:var(--cut-2);font-size:15px;}
-  .fx-revs{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:14px;margin-top:12px;}
-  .fx-revs .fx-alert{margin-top:0;}
+  .fx-revhead .rev-hint{font-size:11px;font-weight:500;color:var(--faint);margin-left:6px;}
+  .fx-alert-h .rev-n{float:right;font-size:11px;font-weight:600;color:var(--faint);}
+  .fx-revs{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;margin-top:12px;padding-bottom:8px;-webkit-overflow-scrolling:touch;scrollbar-width:thin;}
+  .fx-revs::-webkit-scrollbar{height:6px;}
+  .fx-revs::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px;}
+  .fx-revs .fx-alert{margin-top:0;flex:0 0 clamp(240px,80%,290px);scroll-snap-align:start;}
   .fx-alert{margin-top:18px;border-left:3px solid var(--cut);background:linear-gradient(90deg,rgba(255,106,77,.08),var(--surface) 60%);}
   .fx-alert-h{font-weight:700;color:var(--cut-2);margin-bottom:8px;}
   .fx-alert-b{font-size:14px;line-height:1.6;margin-bottom:6px;} .fx-alert-b b{color:var(--ink);}
@@ -1301,14 +1305,14 @@
     };
     let alertCard="";
     if(crossings.length){
-      const cards = crossings.slice(0,4).map(c=>`
+      const cards = crossings.map((c,i)=>`
         <div class="fx-card fx-alert">
-          <div class="fx-alert-h">⚠️ ${c.L.name} ↗ ${c.H.name}</div>
+          <div class="fx-alert-h">⚠️ ${c.L.name} ↗ ${c.H.name} <span class="rev-n">${i+1}/${crossings.length}</span></div>
           <div class="fx-alert-b"><b>${c.L.name}</b>(${c.rankL}위)가 <b>${Math.round(c.t)}일 뒤</b> <b>${c.H.name}</b>(${c.rankH}위) 추월 가능</div>
           <div class="fx-alert-d">교차일 <b class="num">${mdLabel(c.idx)}</b> · 가능성 ${conf(c.t)}</div>
           ${revSvg(c)}
         </div>`).join("");
-      alertCard=`<div class="fx-revhead">⚠️ 순위 변동 예상 · 임박 ${Math.min(crossings.length,4)}건 (총 ${crossings.length}건)</div><div class="fx-revs">${cards}</div>`;
+      alertCard=`<div class="fx-revhead">⚠️ 순위 변동 예상 · ${crossings.length}건 <span class="rev-hint">← 옆으로 슥슥 →</span></div><div class="fx-revs">${cards}</div>`;
     }
 
     // ---- 오늘의 시장 뉴스 ----
